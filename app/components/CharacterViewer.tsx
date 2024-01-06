@@ -22,6 +22,7 @@ export default function CharacterViewer() {
 				'https://the-one-api.dev/v2/character/?limit=10',
 				{
 					headers: {
+						// TODO: don't hard code the bearer token :)
 						Authorization: 'Bearer Zsmdiwp18H6GxN2RYp2X',
 					},
 				}
