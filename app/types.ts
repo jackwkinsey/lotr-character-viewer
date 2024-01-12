@@ -15,5 +15,6 @@ export type CharactersResponse = {
 	limit: number
 	offset: number
 	page: number
+	pages: number
 	total: number
 }

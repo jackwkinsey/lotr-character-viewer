@@ -13,11 +13,15 @@ export default function CharacterViewer() {
 	)
 	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [isOpen, setIsOpen] = useState(false)
+	const [page, setPage] = useState(1)
+	const [totalPages, setTotalPages] = useState(1)
 
 	useEffect(() => {
 		const loadCharacters = async () => {
 			const charactersRes = await getCharacters()
 			setCharacters(charactersRes.docs)
+			setPage(charactersRes.page)
+			setTotalPages(charactersRes.pages)
 		}
 		loadCharacters()
 	}, [])
@@ -42,7 +46,13 @@ export default function CharacterViewer() {
 		setIsOpen(false)
 	}
 
-	// TODO: implement pagination so we could page through the character list
+	const goToPage = async (pageNumber: number) => {
+		const charactersRes = await getCharacters(10, pageNumber)
+		setPage(pageNumber)
+		setCharacters(charactersRes.docs)
+		setTotalPages(charactersRes.pages)
+	}
+
 	// TODO: implement search/filtering so we could quickly find the character we're interested in
 	const characterListItems = characters.map((character: Character) => (
 		<li
@@ -57,6 +67,31 @@ export default function CharacterViewer() {
 	return (
 		<>
 			<ul>{characterListItems}</ul>
+
+			<div>
+				<span className="hover:cursor-pointer" onClick={() => goToPage(1)}>
+					first
+				</span>{' '}
+				<span
+					className="hover:cursor-pointer"
+					onClick={() => goToPage(page > 1 ? page - 1 : 1)}
+				>
+					prev
+				</span>{' '}
+				<span
+					className="hover:cursor-pointer"
+					onClick={() => goToPage(page + 1)}
+				>
+					next
+				</span>{' '}
+				<span
+					className="hover:cursor-pointer"
+					onClick={() => goToPage(totalPages)}
+				>
+					last
+				</span>
+			</div>
+
 			{isOpen && (
 				<Modal onClose={closeModal}>
 					<div>
