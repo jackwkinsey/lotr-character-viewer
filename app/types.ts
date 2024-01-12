@@ -9,3 +9,11 @@ export type Quote = {
 	id: string
 	dialog: string
 }
+
+export type CharactersResponse = {
+	docs: Character[]
+	limit: number
+	offset: number
+	page: number
+	total: number
+}

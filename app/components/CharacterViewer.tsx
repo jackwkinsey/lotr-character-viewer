@@ -4,54 +4,36 @@ import { useEffect, useState } from 'react'
 
 import Modal from './Modal'
 import type { Character, Quote } from '../types'
+import { getCharacterQuotes, getCharacters } from '../api'
 
 export default function CharacterViewer() {
-	const [characters, setCharacters] = useState([])
+	const [characters, setCharacters] = useState<Character[]>([])
 	const [characterSelected, setCharacterSelected] = useState<Character | null>(
 		null
 	)
-	const [quotes, setQuotes] = useState([])
+	const [quotes, setQuotes] = useState<Quote[]>([])
 	const [isOpen, setIsOpen] = useState(false)
 
 	useEffect(() => {
-		// TODO: pull API methods (getCharacters and getCharacterQuotes) out into API file
-		const getCharacters = async () => {
-			const res = await fetch(
-				// TODO: use base URL so we aren't typing it all the time
-				// TODO: configure the character limit so other limits could be used
-				'https://the-one-api.dev/v2/character/?limit=10',
-				{
-					headers: {
-						// TODO: don't hard code the bearer token :)
-						Authorization: 'Bearer Zsmdiwp18H6GxN2RYp2X',
-					},
-				}
-			)
-			const data = await res.json()
-			setCharacters(data.docs)
+		const loadCharacters = async () => {
+			const charactersRes = await getCharacters()
+			setCharacters(charactersRes.docs)
 		}
-		getCharacters()
+		loadCharacters()
 	}, [])
 
-	const getCharacterQuotes = async (characterId: string) => {
-		const res = await fetch(
-			`https://the-one-api.dev/v2/character/${characterId}/quote`,
-			{
-				headers: {
-					Authorization: 'Bearer Zsmdiwp18H6GxN2RYp2X',
-				},
+	useEffect(() => {
+		setQuotes([])
+		const getQuotes = async () => {
+			if (characterSelected) {
+				const characterQuotes = await getCharacterQuotes(characterSelected._id)
+				setQuotes(characterQuotes)
 			}
-		)
-		const data = await res.json()
-		let quotesData = data.docs
-		if (quotesData.length > 2) {
-			quotesData = quotesData.slice(0, 2)
 		}
-		setQuotes(quotesData)
-	}
+		getQuotes()
+	}, [characterSelected])
 
 	const handleClick = async (character: Character) => {
-		getCharacterQuotes(character._id)
 		setCharacterSelected(character)
 		setIsOpen(true)
 	}
@@ -63,12 +45,15 @@ export default function CharacterViewer() {
 	// TODO: implement pagination so we could page through the character list
 	// TODO: implement search/filtering so we could quickly find the character we're interested in
 	const characterListItems = characters.map((character: Character) => (
-		<li key={character._id} onClick={() => handleClick(character)}>
+		<li
+			key={character._id}
+			onClick={() => handleClick(character)}
+			className="hover:cursor-pointer"
+		>
 			{character.name}
 		</li>
 	))
 
-	// TODO: dim and make background un-clickable when the modal is opened
 	return (
 		<>
 			<ul>{characterListItems}</ul>
@@ -88,7 +73,7 @@ export default function CharacterViewer() {
 						Quotes: {!quotes.length && 'No quotes found'}
 						<ul>
 							{quotes.map((quote: Quote) => (
-								<li key={quote.id} className="block list-disc">
+								<li key={quote.id} className="block ml-4">
 									&quot;{quote.dialog}&quot;
 								</li>
 							))}
