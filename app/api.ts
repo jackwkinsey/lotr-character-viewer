@@ -23,15 +23,11 @@ export async function getCharacterQuotes(
 	characterId: string,
 	numberOfQuotes: number = 2
 ): Promise<Quote[]> {
-	const res = await fetch(`${base_url}/character/${characterId}/quote`, {
+	const res = await fetch(`${base_url}/character/${characterId}/quote?limit=${numberOfQuotes}`, {
 		headers: {
 			Authorization: `Bearer ${process.env.ONE_API_KEY}`,
 		},
 	})
 	const data = await res.json()
-	let quotesData = data.docs
-	if (quotesData.length > numberOfQuotes) {
-		quotesData = quotesData.slice(0, numberOfQuotes)
-	}
-	return quotesData
+	return data.docs
 }
